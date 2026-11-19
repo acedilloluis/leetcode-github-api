@@ -33,13 +33,15 @@ partial class Program
 
     //problem solution query types
     record Question(
+        string Title,
         string Content,
         string[] MySqlSchemas,
+        string Note,
         string Difficulty,
         float AcRate
     );
 
-    record Submission(
+    record SubmissionDetails(
         string Code,
         int Timestamp,
         int StatusCode,
@@ -52,6 +54,6 @@ partial class Program
 
     record ProblemSolution(
         Question Question,
-        Submission SubmissionDetails
+        SubmissionDetails SubmissionDetails
     );
 }

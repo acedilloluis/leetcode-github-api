@@ -8,7 +8,7 @@ partial class Program
     [JsonSerializable(typeof(Request))]
     [JsonSerializable(typeof(RecentSubmission))]
     [JsonSerializable(typeof(ProblemSolution))]
-    [JsonSerializable(typeof(Response<List<ProblemSolution>>))]
+    [JsonSerializable(typeof(Response<ProblemSolution>))]
     [JsonSerializable(typeof(Response<RecentSubmissionsData<List<RecentSubmission>>>))]
     partial class RequestsJsonContext : JsonSerializerContext;
 }
