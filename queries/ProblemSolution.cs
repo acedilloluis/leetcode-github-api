@@ -3,8 +3,8 @@ namespace Api;
 partial class Program
 {
     const string PROBLEMSOLUTION = """
-        query problemSolution($titleslug: String!, $submissionId: Int!) {
-            question(titleslug: $titleslug) {
+        query problemSolution($titleSlug: String!, $submissionId: Int!) {
+            question(titleSlug: $titleSlug) {
                 content
                 mysqlSchemas
                 difficulty

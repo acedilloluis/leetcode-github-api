@@ -1,39 +1,30 @@
-using System.ComponentModel;
+using System.Text.Json.Nodes;
 
 namespace Api;
 
 partial class Program
 {
-
-    static async Task<List<Response<RecentSubmission>>> GetRecentSubmissions(HttpClient client)
+    static async Task<Response<RecentSubmissionsData<List<RecentSubmission>>>> GetRecentSubmissions(HttpClient client)
     {
-        Request<RecentSubmissionVariables> query = new Request<RecentSubmissionVariables>(
+        Request query = new(
             RECENTSUBMISSIONS,
-            new RecentSubmissionVariables(
-                USERNAME,
-                RECENTSUBMISSIONSLIMIT
-            )
+            new JsonObject 
+            {
+                ["username"] = USERNAME,
+                ["limit"] = RECENTSUBMISSIONSLIMIT
+            }
         );
 
-        try
-        {
-            using HttpResponseMessage response = await client.PostAsJsonAsync<Request<RecentSubmissionVariables>>(
-                "",
-                query,
-                RequestsJsonContext.Default.RequestRecentSubmissionVariables
-            );
+        using HttpResponseMessage response = await client.PostAsJsonAsync<Request>(
+            "",
+            query,
+            RequestsJsonContext.Default.Request
+        );
 
-            List<Response<RecentSubmission>> recentSubmissions = 
-                await response.Content.ReadFromJsonAsync<List<Response<RecentSubmission>>>(
-                    RequestsJsonContext.Default.ListResponseRecentSubmission)
-                    ?? new List<Response<RecentSubmission>>();
-            
-            return recentSubmissions;
-        }
-        catch (HttpRequestException e)
-        {
-            Console.Error.WriteLine($"Exception caught! Message : {e.Message}");
-            return new List<Response<RecentSubmission>>();
-        }
+        Response<RecentSubmissionsData<List<RecentSubmission>>> recentSubmissions = await response.Content.ReadFromJsonAsync(
+            RequestsJsonContext.Default.ResponseRecentSubmissionsDataListRecentSubmission
+        ) ?? throw new InvalidOperationException("The recent submissions response was empty.");
+
+        return recentSubmissions;
     }
 }

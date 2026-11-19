@@ -23,10 +23,9 @@ partial class Program
         {
             string language = parseResult.GetValue(languageArg)!;
             DateOnly date = parseResult.GetValue(dateArg);
-            List<Response<RecentSubmission>> recentSubmissions = await GetRecentSubmissions(client);
-            
-            foreach (Response<RecentSubmission> recentSubmission in recentSubmissions)
-                Console.WriteLine($"{recentSubmission?.Data?.Title}\n");
+            Response<RecentSubmissionsData<List<RecentSubmission>>> recentSubmissions = 
+                await GetRecentSubmissions(client);
+           
         });
 
         return createCommand;

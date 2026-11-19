@@ -1,13 +1,14 @@
-using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Api;
 
 partial class Program
 {
-    [System.Text.Json.Serialization.JsonSerializable(typeof(Request<RecentSubmissionVariables>))]
-    [System.Text.Json.Serialization.JsonSerializable(typeof(RecentSubmission))]
-    [System.Text.Json.Serialization.JsonSerializable(typeof(ProblemSolution))]
-    [System.Text.Json.Serialization.JsonSerializable(typeof(List<Response<ProblemSolution>>))]
-    [System.Text.Json.Serialization.JsonSerializable(typeof(List<Response<RecentSubmission>>))]
-    partial class RequestsJsonContext : System.Text.Json.Serialization.JsonSerializerContext;
+    [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
+    [JsonSerializable(typeof(Request))]
+    [JsonSerializable(typeof(RecentSubmission))]
+    [JsonSerializable(typeof(ProblemSolution))]
+    [JsonSerializable(typeof(Response<List<ProblemSolution>>))]
+    [JsonSerializable(typeof(Response<RecentSubmissionsData<List<RecentSubmission>>>))]
+    partial class RequestsJsonContext : JsonSerializerContext;
 }

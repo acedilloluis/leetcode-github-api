@@ -1,16 +1,13 @@
+using System.Text.Json.Nodes;
+
 namespace Api;
 
 partial class Program
 {
     //graphql request wrapper
-    record Request<T>(
+    record Request(
         string Query,
-        T Variables
-    );
-
-    record RecentSubmissionVariables(
-        string Username,
-        int Limit
+        JsonNode Variables
     );
 
     //graphql response wrapper
@@ -24,11 +21,17 @@ partial class Program
         string Message
     );
 
+    //recent submission query types
     record RecentSubmission(
-        int Id,
-        string Title
+        string Id,
+        string TitleSlug
     );
 
+    record RecentSubmissionsData<T>(
+        T RecentAcSubmissionList
+    );
+
+    //problem solution query types
     record Question(
         string Content,
         string[] MySqlSchemas,

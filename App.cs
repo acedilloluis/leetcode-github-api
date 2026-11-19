@@ -6,6 +6,7 @@
 #:include env/EnvironmentVariables.cs
 
 global using System.CommandLine;
+using System.Net;
 
 namespace Api;
 
@@ -13,14 +14,29 @@ partial class Program
 {
     public static int Main(string[] args)
     {
-        using HttpClient client = new()
+        Uri baseAddress = new(BASEADDRESS);
+        Uri graphqlEndpoint = new(baseAddress, "graphql");
+
+        CookieContainer cookieContainer = new();
+        cookieContainer.Add(graphqlEndpoint, new Cookie("csrftoken", CSRFTOKEN));
+        cookieContainer.Add(graphqlEndpoint, new Cookie("LEETCODE_SESSION", LEETCODESESSION));
+
+        HttpClientHandler handler = new()
         {
-            BaseAddress = new Uri("https://leetcode.com/graphql")
+            CookieContainer = cookieContainer
         };
+
+        using HttpClient client = new(handler)
+        {
+            BaseAddress = graphqlEndpoint
+        };
+
+        client.DefaultRequestHeaders.Referrer = new Uri(baseAddress, USERNAME);
+        client.DefaultRequestHeaders.Add("x-csrftoken", CSRFTOKEN);
 
         Command createCommand = CreateCommand(client);
 
-        RootCommand rootCommand = new RootCommand("Simple API to save solved LeetCode exercises to GitHub")
+        RootCommand rootCommand = new("Simple API to save solved LeetCode exercises to GitHub")
         {
             Subcommands = {createCommand}
         };
