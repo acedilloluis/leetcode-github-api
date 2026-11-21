@@ -1,12 +1,14 @@
 #!/usr/bin/env dotnet
 #:package System.CommandLine@3.0.0
+#:package Octokit@14.0.0
 #:include commands/CreateCommand.cs
 #:include queries/*.cs
 #:include httprequests/*.cs
+#:include json/*.cs
 #:include env/EnvironmentVariables.cs
 
 global using System.CommandLine;
-using System.Net;
+using Octokit;
 
 namespace Api;
 
@@ -14,27 +16,13 @@ partial class Program
 {
     public static int Main(string[] args)
     {
-        Uri baseAddress = new(BASEADDRESS);
-        Uri graphqlEndpoint = new(baseAddress, "graphql");
+        //create httpclinet to make requests to leetcode api
+        using HttpClient client = GetLeetCodeClient();
 
-        CookieContainer cookieContainer = new();
-        cookieContainer.Add(graphqlEndpoint, new Cookie("csrftoken", CSRFTOKEN));
-        cookieContainer.Add(graphqlEndpoint, new Cookie("LEETCODE_SESSION", LEETCODESESSION));
+        //create github client
+        GitHubClient gitHubClient = GetGitHubClient();
 
-        HttpClientHandler handler = new()
-        {
-            CookieContainer = cookieContainer
-        };
-
-        using HttpClient client = new(handler)
-        {
-            BaseAddress = graphqlEndpoint
-        };
-
-        client.DefaultRequestHeaders.Referrer = new Uri(baseAddress, USERNAME);
-        client.DefaultRequestHeaders.Add("x-csrftoken", CSRFTOKEN);
-
-        Command createCommand = CreateCommand(client);
+        Command createCommand = CreateCommand(client, gitHubClient);
 
         RootCommand rootCommand = new("Simple API to save solved LeetCode exercises to GitHub")
         {

@@ -1,5 +1,6 @@
 using System.Text;
 using System.Xml.Linq;
+using Octokit;
 
 namespace Api;
 
@@ -20,7 +21,7 @@ partial class Program
         Arguments = { languageArg, dateArg }
     };
 
-    static Command CreateCommand(HttpClient client)
+    static Command CreateCommand(HttpClient client, GitHubClient gitHubClient)
     {
         createCommand.SetAction(async parseResult =>
         {
@@ -42,28 +43,32 @@ partial class Program
                 problemSolutions.Add(problemSolution);
             }
 
-            List<ProblemSolution> filteredProblemSolutions = FilterProblemSolutions(language, date, problemSolutions);
-            Console.WriteLine(BuildMarkDownFile(filteredProblemSolutions[0]));
-            //allow garbage collector to reclaim memory; problemsolutions no longer needed
-            problemSolutions = null!;
+            List<ProblemSolution> filteredProblemSolutions = problemSolutions
+                .Where(problemSolution => MatchesLangDate(language, date, problemSolution))
+                .Select(problemSolution => problemSolution.Data!)
+                .ToList();
+
+            List<File> files = filteredProblemSolutions
+                .Select(problemSolution => new File(problemSolution.Question.TitleSlug, BuildMarkDownFile(problemSolution)))
+                .ToList();
+
+            await UploadFiles(gitHubClient, language, date, files);
+            Console.WriteLine("Successfully uploaded files!");
         });
         return createCommand;
     }
 
-    static List<ProblemSolution> FilterProblemSolutions(string language, DateOnly date, List<Response<ProblemSolution>> problemSolutions)
+    static bool MatchesLangDate(string language, DateOnly date, Response<ProblemSolution> problemSolution)
     {
-        List<ProblemSolution> unwrappedAndFiltered = new();
-
-        foreach (Response<ProblemSolution> problemSolution in problemSolutions)
-        {
-            //convert timestamp in problemSolution to dateonly
-            DateOnly submissionDate = DateOnly.FromDateTime(
-                DateTimeOffset.FromUnixTimeSeconds(problemSolution.Data!.SubmissionDetails.Timestamp).LocalDateTime
-            );
-            if (problemSolution.Data!.SubmissionDetails.Lang.Name == language && submissionDate == date)
-                unwrappedAndFiltered.Add(problemSolution.Data!);
-        }
-        return unwrappedAndFiltered;
+        //convert timestamp in problemSolution to dateonly
+        DateOnly submissionDate = DateOnly.FromDateTime(
+            DateTimeOffset.FromUnixTimeSeconds(problemSolution.Data!.SubmissionDetails.Timestamp).LocalDateTime
+        );
+        
+        if (problemSolution.Data!.SubmissionDetails.Lang.Name == language && submissionDate == date)
+            return true;
+        
+        return false;
     }
 
     static string BuildMarkDownFile(ProblemSolution problemSolution)

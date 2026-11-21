@@ -10,7 +10,7 @@ partial class Program
             RECENTSUBMISSIONS,
             new JsonObject 
             {
-                ["username"] = USERNAME,
+                ["username"] = LEETCODEUSERNAME,
                 ["limit"] = RECENTSUBMISSIONSLIMIT
             }
         );

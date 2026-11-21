@@ -6,6 +6,7 @@ partial class Program
         query problemSolution($titleSlug: String!, $submissionId: Int!) {
             question(titleSlug: $titleSlug) {
                 title
+                titleSlug
                 content
                 mysqlSchemas
                 note
@@ -15,7 +16,6 @@ partial class Program
             submissionDetails(submissionId: $submissionId) {
                 code
                 timestamp
-                statusCode
                 lang {
                     name
                 }
