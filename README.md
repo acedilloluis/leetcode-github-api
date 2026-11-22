@@ -1,6 +1,6 @@
-# A LeetCode to GitHub API
+# A LeetCode to GitHub CLI Tool
 
-A simple API connecting LeetCode's GraphQL endpoint to GitHub's REST API via the command line. It queries LeetCode for recently accepted submissions, creates a markdown file for each submission containing the problem statement and solution, and uploads those files to a GitHub repository. 
+A simple CLI tool connecting LeetCode's GraphQL endpoint to GitHub's REST API. It queries LeetCode for recently accepted submissions, creates a markdown file for each submission containing the problem statement and solution, and uploads those files to a GitHub repository. 
 
 ## Usage
 
