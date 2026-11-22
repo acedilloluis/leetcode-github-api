@@ -40,11 +40,27 @@ partial class Program
         TreeResponse createdTree = await client.Git.Tree.Create(GITHUBUSERNAME, GITHUBREPONAME, tree);
         NewCommit commit = new($"upload problems solved on {date}", createdTree.Sha, latestCommitSha);
         Commit createdCommit = await client.Git.Commit.Create(GITHUBUSERNAME, GITHUBREPONAME, commit);
-        await client.Git.Reference.Update(
-            GITHUBUSERNAME, 
-            GITHUBREPONAME, 
-            "heads/main", 
-            new ReferenceUpdate(createdCommit.Sha)
-        );
+
+        try
+        {
+            await client.Git.Reference.Update(
+                GITHUBUSERNAME, 
+                GITHUBREPONAME, 
+                "heads/main", 
+                new ReferenceUpdate(createdCommit.Sha)
+            );    
+        }
+        catch (NotFoundException e)
+        {
+            Console.Error.WriteLine($"Reference not found! {e.Message}");
+        }
+        catch (ApiException e) when (e is AuthorizationException or ForbiddenException)
+        {
+            Console.Error.WriteLine($"Access denied! {e.Message}");
+        }
+        catch (ApiException e)
+        {
+            Console.Error.WriteLine($"GitHub API error! Status Code: {e.StatusCode}. {e.Message}");
+        }
     }
 }
