@@ -52,9 +52,15 @@ partial class Program
                 .Select(problemSolution => new File(problemSolution.Question.TitleSlug, BuildMarkDownFile(problemSolution)))
                 .ToList();
 
-            await UploadFiles(gitHubClient, language, date, files);
-            Console.WriteLine("Successfully uploaded files!");
+            if (files.Count == 0)
+                Console.WriteLine("No files to upload!");
+            else
+            {
+                await UploadFiles(gitHubClient, language, date, files);
+                Console.WriteLine("Files successfully uploaded!");
+            }
         });
+
         return createCommand;
     }
 
