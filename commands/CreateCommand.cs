@@ -33,17 +33,10 @@ partial class Program
             Response<RecentSubmissionsData<List<RecentSubmission>>> recentSubmissions = 
                 await GetRecentSubmissions(client);
 
-            List<Response<ProblemSolution>> problemSolutions = new();
-            //get problem statements and solutions by submissionId
-            foreach (RecentSubmission recentSubmission in recentSubmissions.Data!.RecentAcSubmissionList!)
-            {
-                Response<ProblemSolution> problemSolution = await GetProblemSolution(
-                    recentSubmission.Id,
-                    recentSubmission.TitleSlug, 
-                    client
-                );
-                problemSolutions.Add(problemSolution);
-            }
+            List<Response<ProblemSolution>> problemSolutions = await GetProblemSolutions(
+                client,
+                recentSubmissions.Data!.RecentAcSubmissionList
+            );
 
             List<ProblemSolution> filteredProblemSolutions = problemSolutions
                 .Where(problemSolution => MatchesLangDate(language, date, problemSolution))
@@ -59,11 +52,28 @@ partial class Program
             else
             {
                 await UploadFiles(gitHubClient, language, date, files);
-                Console.WriteLine("Files successfully uploaded!");
+                Console.WriteLine($"{files.Count} Files successfully uploaded!");
             }
         });
 
         return createCommand;
+    }
+
+    static async Task<List<Response<ProblemSolution>>> GetProblemSolutions(HttpClient client, List<RecentSubmission> recentSubmissions)
+    {
+        List<Response<ProblemSolution>> problemSolutions = new();
+        //get problem statements and solutions by submissionId
+        foreach (RecentSubmission recentSubmission in recentSubmissions)
+        {
+            Response<ProblemSolution> problemSolution = await GetProblemSolution(
+                recentSubmission.Id,
+                recentSubmission.TitleSlug, 
+                client
+            );
+            problemSolutions.Add(problemSolution);
+        }
+
+        return problemSolutions;
     }
 
     static bool MatchesLangDate(string language, DateOnly date, Response<ProblemSolution> problemSolution)
